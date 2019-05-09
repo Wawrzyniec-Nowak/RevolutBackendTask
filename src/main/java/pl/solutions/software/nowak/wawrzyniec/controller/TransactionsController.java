@@ -7,7 +7,7 @@ import pl.solutions.software.nowak.wawrzyniec.service.AccountValidator;
 
 import java.math.BigDecimal;
 
-import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class TransactionsController {
 
@@ -16,12 +16,10 @@ public class TransactionsController {
     private TransactionsController(AccountDao accountDao) {
         this.accountDao = accountDao;
 
-        get("/transfer", //
+        post("/transaction", //
                 (request, response) -> {
-                    String from = request.queryParams("from");
-                    String to = request.queryParams("to");
-                    String amount = request.queryParams("amount");
-                    return this.transfer(from, to, amount);
+                    TransferMoneyRequest req = new Gson().fromJson(request.body(), TransferMoneyRequest.class);
+                    return this.transfer(req.getSender(), req.getRecipient(), req.getAmount());
                 }, //
                 response -> new Gson().toJson(response));
     }
@@ -39,12 +37,12 @@ public class TransactionsController {
         return INSTANCE;
     }
 
-    Response transfer(String from, String to, String amount) {
+    Response transfer(long from, long to, String amount) {
         Account sender;
         Account recipient;
         try {
-            sender = findAccount(Long.valueOf(from));
-            recipient = findAccount(Long.valueOf(to));
+            sender = findAccount(from);
+            recipient = findAccount(to);
         } catch (IllegalStateException e) {
             return new Response(Response.Status.FAILURE, e.getMessage());
         }

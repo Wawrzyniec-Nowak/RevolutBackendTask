@@ -2,6 +2,7 @@ package pl.solutions.software.nowak.wawrzyniec.model.store;
 
 import pl.solutions.software.nowak.wawrzyniec.model.Account;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -18,6 +19,10 @@ public class InMemoryDatabase {
     }
 
     public List<Account> getAccounts() {
-        return accounts;
+        return Collections.unmodifiableList(accounts);
+    }
+
+    public void drop() {
+        accounts.clear();
     }
 }
